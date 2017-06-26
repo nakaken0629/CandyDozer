@@ -5,12 +5,15 @@ using UnityEngine;
 public class Shooter : MonoBehaviour
 {
 	const int SphereCandyFrequency = 3;
+	const int MaxShotPower = 5;
+	const int RecoverySeconds = 3;
 
 	int sampleCandyCount;
+	int shotPower = MaxShotPower;
 
 	public GameObject[] candyPrefabs;
 	public GameObject[] candySquarePrefabs;
-	public GameObject candyHolder;
+	public CandyHolder candyHolder;
 	public float shotSpeed;
 	public float shotTorque;
 	public float baseWidth;
@@ -50,6 +53,14 @@ public class Shooter : MonoBehaviour
 
 	public void Shot ()
 	{
+		// キャンディを生成できる条件外だったらShotしない
+		if (candyHolder.GetCandyAmount () <= 0) {
+			return;
+		}
+		if (shotPower <= 0) {
+			return;
+		}
+
 		// プレファブからCandyオブジェクトを生成
 		GameObject candy = (GameObject)Instantiate (
 			                   SampleCandy (),
@@ -64,5 +75,37 @@ public class Shooter : MonoBehaviour
 		Rigidbody candyRigidbody = candy.GetComponent<Rigidbody> ();
 		candyRigidbody.AddForce (transform.forward * shotSpeed);
 		candyRigidbody.AddForce (new Vector3 (0, shotTorque, 0));
+
+		// Candyのストックを消費
+		candyHolder.ConsumeCandy ();
+		// ShotPowerを消費
+		ConsumePower ();
+	}
+
+	void OnGUI ()
+	{
+		GUI.color = Color.black;
+
+		// ShotPowerの残数を+の数で表示
+		string label = "";
+		for (int i = 0; i < shotPower; i++) {
+			label = label + "+";
+		}
+
+		GUI.Label (new Rect (0, 15, 100, 30), label);
+	}
+
+	void ConsumePower ()
+	{
+		// ShotPowerを消費すると同時に回復のカウントをスタート
+		shotPower--;
+		StartCoroutine (RecoverPower ());
+	}
+
+	IEnumerator RecoverPower ()
+	{
+		// 一定秒数待った後にshotPowerを回復
+		yield return new WaitForSeconds (RecoverySeconds);
+		shotPower++;
 	}
 }
