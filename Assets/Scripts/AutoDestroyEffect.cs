@@ -2,16 +2,19 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class AutoDestroyEffect : MonoBehaviour {
+public class AutoDestroyEffect : MonoBehaviour
+{
 	ParticleSystem particle;
 
 	// Use this for initialization
-	void Start () {
+	void Start ()
+	{
 		particle = GetComponent<ParticleSystem> ();
 	}
 	
 	// Update is called once per frame
-	void Update () {
+	void Update ()
+	{
 		// パーティクルの再生が終了したらGameObjectを削除
 		if (particle.isPlaying == false) {
 			Destroy (gameObject);
